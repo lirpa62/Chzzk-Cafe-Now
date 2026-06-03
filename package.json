@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "generate-icons": "node scripts/generate-icons.js",
-    "package": "node scripts/package-extension.js",
+    "package": "node scripts/package-extension.js chrome",
+    "package:chrome": "node scripts/package-extension.js chrome",
+    "package:firefox": "node scripts/package-extension.js firefox",
     "test": "node --test"
   }
 }

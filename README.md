@@ -70,6 +70,14 @@ npm run package
 
 생성된 파일은 `dist/chzzk-cafe-now-{version}.zip`에 저장됩니다. 배포 ZIP에는 `manifest.json`, `README.md`, `src/`, manifest에서 참조하는 아이콘 파일만 포함되며, `tests/`, `scripts/`, `package.json`, 원본 `assets/icon.png`는 제외됩니다.
 
+Firefox 애드온 배포용 ZIP은 다음 명령으로 생성합니다.
+
+```bash
+npm run package:firefox
+```
+
+생성된 파일은 `dist/chzzk-cafe-now-firefox-{version}.zip`에 저장됩니다. Firefox용 ZIP은 같은 소스 파일을 사용하지만, manifest의 background 선언을 Firefox가 지원하는 `background.scripts` 형식으로 변환하고 `browser_specific_settings.gecko` 값을 추가합니다.
+
 ## 동작 방식
 
 확장 프로그램은 네이버 카페 문서와 내부 프레임에서 `div.se-component.se-oglink`에 포함된 치지직 클립 링크를 찾습니다. 링크가 발견되면 OG 링크 카드의 썸네일 영역만 공식 치지직 임베드 주소를 사용하는 iframe으로 교체합니다.
