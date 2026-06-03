@@ -3,7 +3,12 @@
   "name": "치즈 카페 나우 - Chzzk Cafe Now",
   "version": "1.0.0",
   "description": "네이버 카페의 치지직 클립 링크를 게시글 안에서 바로 재생합니다.",
-  "host_permissions": ["https://api.chzzk.naver.com/*"],
+  "permissions": ["scripting"],
+  "host_permissions": [
+    "https://api.chzzk.naver.com/*",
+    "https://cafe.naver.com/*",
+    "https://*.cafe.naver.com/*"
+  ],
   "background": {
     "service_worker": "src/background.js"
   },
