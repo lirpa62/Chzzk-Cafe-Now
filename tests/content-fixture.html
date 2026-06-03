@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>치즈카페나우 콘텐츠 스크립트 fixture</title>
+    <link rel="stylesheet" href="../src/content.css" />
+  </head>
+  <body>
+    <main class="se-main-container">
+      <div id="og-card" class="se-component se-oglink">
+        <div class="se-section se-section-oglink">
+          <div class="se-oglink-container">
+          <a class="se-oglink-info" href="https://chzzk.naver.com/clips/06B56r5cXb">
+            <strong class="se-oglink-title">카페 가입을 안해도 월페이퍼를 - CHZZK</strong>
+            <p class="se-oglink-summary">제거할 OG 링크 요약</p>
+            <span class="se-oglink-url">chzzk.naver.com</span>
+          </a>
+          <a class="se-oglink-thumbnail" href="https://chzzk.naver.com/clips/06B56r5cXb">
+            <img alt="치지직 클립 OG 링크 썸네일" />
+          </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="se-component se-text se-l-default" id="standalone-link">
+        <div class="se-component-content">
+          <div class="se-section se-section-text se-l-default">
+            <div class="se-module se-module-text">
+              <p class="se-text-paragraph">
+                <span>
+                  <a href="https://chzzk.naver.com/clips/06B56r5cXb" class="se-link __se_link">
+                    https://chzzk.naver.com/clips/06B56r5cXb
+                  </a>
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="se-component se-text se-l-default" id="standalone-embed-link">
+        <div class="se-component-content">
+          <div class="se-section se-section-text se-l-default">
+            <div class="se-module se-module-text">
+              <p class="se-text-paragraph">
+                <span>
+                  <a href="https://chzzk.naver.com/embed/clip/RMynBK4Xvs" class="se-link __se_link">
+                    https://chzzk.naver.com/embed/clip/RMynBK4Xvs
+                  </a>
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="se-component se-text se-l-default" id="standalone-clip-link">
+        <div class="se-component-content">
+          <div class="se-section se-section-text se-l-default">
+            <div class="se-module se-module-text">
+              <p class="se-text-paragraph">
+                <span>
+                  <a href="https://chzzk.naver.com/clips/standaloneClip" class="se-link __se_link">
+                    https://chzzk.naver.com/clips/standaloneClip
+                  </a>
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="se-component se-text se-l-default" id="standalone-link-with-blank-paragraph">
+        <div class="se-component-content">
+          <div class="se-section se-section-text se-l-default">
+            <div class="se-module se-module-text">
+              <p class="se-text-paragraph se-text-paragraph-align-">
+                <span class="se-fs- se-ff-">
+                  <a
+                    href="https://chzzk.naver.com/clips/b96w27Zyqk"
+                    class="se-link __se_link"
+                    data-linktype="text"
+                    data-linkdata="{&quot;link&quot;:&quot;https://chzzk.naver.com/clips/b96w27Zyqk&quot;}"
+                    target="_blank"
+                  >
+                    https://chzzk.naver.com/clips/b96w27Zyqk
+                  </a>
+                </span>
+              </p>
+              <p class="se-text-paragraph se-text-paragraph-align-">
+                <span class="se-fs- se-ff-">​</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      globalThis.fixtureMetadataRequestCount = 0;
+      globalThis.chrome = {
+        runtime: {
+          lastError: null,
+          sendMessage(message, callback) {
+            globalThis.fixtureMetadataRequestCount += 1;
+            setTimeout(() => {
+              callback({
+                metadata: {
+                  streamerName: "모라라",
+                  title: "카페 가입을 안해도 월페이퍼를",
+                },
+              });
+            }, 250);
+          },
+        },
+      };
+    </script>
+    <script src="../src/clip-url.js"></script>
+    <script src="../src/content.js"></script>
+    <script>
+      setTimeout(() => {
+        const title = document.querySelector(".se-oglink-title");
+        document.body.dataset.fixtureMetadataRequestCount = String(
+          globalThis.fixtureMetadataRequestCount,
+        );
+        document.body.dataset.fixtureClipUrlCount = String(
+          (title?.textContent.match(/https:\/\/chzzk\.naver\.com\/clips\//g) || [])
+            .length,
+        );
+        document.body.dataset.fixtureStandaloneEmbedPlayerCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:RMynBK4Xvs"]',
+          ).length,
+        );
+        document.body.dataset.fixtureStandaloneEmbedComponentCount = String(
+          document.querySelectorAll(
+            '.se-component.se-oglink.se-l-large_image.__se-component[data-chzzk-cafe-now-standalone="clip:RMynBK4Xvs"] .se-module.se-module-oglink > .chzzk-cafe-now-player + a.se-oglink-info.__se_link',
+          ).length,
+        );
+        document.body.dataset.fixtureStandaloneClipPlayerCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:standaloneClip"]',
+          ).length,
+        );
+        document.body.dataset.fixtureBlankParagraphClipPlayerCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:b96w27Zyqk"]',
+          ).length,
+        );
+      }, 500);
+    </script>
+  </body>
+</html>

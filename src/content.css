@@ -1,0 +1,90 @@
+.se-section-oglink {
+  max-width: 800px !important;
+}
+
+.chzzk-cafe-now-player {
+  box-sizing: border-box;
+  position: relative;
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+}
+
+.chzzk-cafe-now-standalone {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 800px;
+  margin: 12px 0;
+}
+
+.chzzk-cafe-now-standalone .se-module-oglink {
+  box-sizing: border-box;
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.chzzk-cafe-now-oglink .se-oglink-container,
+.chzzk-cafe-now-oglink .se-module-oglink {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.chzzk-cafe-now-standalone .se-oglink-info {
+  box-sizing: border-box;
+  display: block;
+  padding: 12px 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.chzzk-cafe-now-standalone .se-oglink-info-container {
+  min-width: 0;
+}
+
+.chzzk-cafe-now-player__frame-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.chzzk-cafe-now-player__frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.chzzk-cafe-now-title {
+  display: flex !important;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.chzzk-cafe-now-title__icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
+.chzzk-cafe-now-title__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chzzk-cafe-now-title__url {
+  flex: 0 0 auto;
+  color: #aeb4ba;
+  font-size: 12px !important;
+}

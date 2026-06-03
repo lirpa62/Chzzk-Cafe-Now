@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "치즈 카페 나우 - Chzzk Cafe Now",
+  "version": "1.0.0",
+  "description": "네이버 카페의 치지직 클립 링크를 게시글 안에서 바로 재생합니다.",
+  "host_permissions": ["https://api.chzzk.naver.com/*"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://cafe.naver.com/*", "https://*.cafe.naver.com/*"],
+      "js": ["src/clip-url.js", "src/content.js"],
+      "css": ["src/content.css"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "icons": {
+    "16": "assets/icon-16.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  }
+}
