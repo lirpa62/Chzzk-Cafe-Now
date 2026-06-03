@@ -75,6 +75,7 @@
     frame.src = api.getEmbedUrl(media);
     frame.title = "CHZZK Player";
     frame.frameBorder = "0";
+    frame.loading = "lazy";
     frame.allow = "autoplay; clipboard-write; web-share";
     frame.allowFullscreen = true;
 
@@ -462,6 +463,12 @@
       attributeFilter: OBSERVED_ATTRIBUTES,
       childList: true,
       subtree: true,
+    });
+
+    [250, 1000, 2500].forEach((delay) => {
+      setTimeout(() => {
+        if (document.documentElement) queueScan(document);
+      }, delay);
     });
   }
 

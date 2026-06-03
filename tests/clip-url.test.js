@@ -54,7 +54,7 @@ test("creates clip media and embed URLs", () => {
   );
   assert.equal(
     getEmbedUrl("06B56r5cXb"),
-    "https://chzzk.naver.com/embed/clip/06B56r5cXb",
+    "https://chzzk.naver.com/embed/clip/06B56r5cXb?parent=cafe.naver.com&extension=ChzzkCafeNow&autoPlay=false&muted=false",
   );
 });
 
@@ -65,6 +65,6 @@ test("creates generic clip media URLs", () => {
   assert.equal(getMediaUrl(media), "https://chzzk.naver.com/clips/06B56r5cXb");
   assert.equal(
     getEmbedUrl(media),
-    "https://chzzk.naver.com/embed/clip/06B56r5cXb",
+    "https://chzzk.naver.com/embed/clip/06B56r5cXb?parent=cafe.naver.com&extension=ChzzkCafeNow&autoPlay=false&muted=false",
   );
 });

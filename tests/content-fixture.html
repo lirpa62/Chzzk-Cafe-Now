@@ -127,6 +127,17 @@
           (title?.textContent.match(/https:\/\/chzzk\.naver\.com\/clips\//g) || [])
             .length,
         );
+        document.body.dataset.fixtureIframeLoading = String(
+          document.querySelector(".chzzk-cafe-now-player__frame")?.getAttribute(
+            "loading",
+          ) || "",
+        );
+        document.body.dataset.fixtureIframeSrcHasOptions = String(
+          document
+            .querySelector(".chzzk-cafe-now-player__frame")
+            ?.src.includes("parent=cafe.naver.com&extension=ChzzkCafeNow") ||
+            false,
+        );
         document.body.dataset.fixtureStandaloneEmbedPlayerCount = String(
           document.querySelectorAll(
             '[data-chzzk-cafe-now-standalone="clip:RMynBK4Xvs"]',

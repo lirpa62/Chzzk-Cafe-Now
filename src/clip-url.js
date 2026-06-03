@@ -76,7 +76,16 @@
 
   function getEmbedUrl(mediaOrClipId) {
     const media = normalizeMedia(mediaOrClipId);
-    return `https://chzzk.naver.com/embed/clip/${encodeURIComponent(media?.id || "")}`;
+    const params = new URLSearchParams({
+      parent: "cafe.naver.com",
+      extension: "ChzzkCafeNow",
+      autoPlay: "false",
+      muted: "false",
+    });
+
+    return `https://chzzk.naver.com/embed/clip/${encodeURIComponent(
+      media?.id || "",
+    )}?${params}`;
   }
 
   return {
