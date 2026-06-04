@@ -22,6 +22,16 @@
         </div>
       </div>
 
+      <div id="og-card-without-thumbnail" class="se-component se-oglink">
+        <div class="se-section se-section-oglink">
+          <div class="se-oglink-container">
+            <a class="se-oglink-info" href="https://chzzk.naver.com/clips/noThumbnailClip">
+              <strong class="se-oglink-title">썸네일 없는 클립 - CHZZK</strong>
+            </a>
+          </div>
+        </div>
+      </div>
+
       <div class="se-component se-text se-l-default" id="standalone-link">
         <div class="se-component-content">
           <div class="se-section se-section-text se-l-default">
@@ -31,6 +41,22 @@
                   <a href="https://chzzk.naver.com/clips/06B56r5cXb" class="se-link __se_link">
                     https://chzzk.naver.com/clips/06B56r5cXb
                   </a>
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="se-component se-text se-l-default" id="standalone-link-with-inline-zero-width">
+        <div class="se-component-content">
+          <div class="se-section se-section-text se-l-default">
+            <div class="se-module se-module-text">
+              <p class="se-text-paragraph">
+                <span>
+                  <a href="https://chzzk.naver.com/clips/inlineZeroWidthClip" class="se-link __se_link">
+                    https://chzzk.naver.com/clips/inlineZeroWidthClip
+                  </a>​
                 </span>
               </p>
             </div>
@@ -94,6 +120,49 @@
           </div>
         </div>
       </div>
+
+      <div class="se-component se-text se-l-default" id="standalone-link-with-sibling-text">
+        <div class="se-component-content">
+          <div class="se-section se-section-text se-l-default">
+            <div class="se-module se-module-text">
+              <p class="se-text-paragraph se-text-paragraph-align-">
+                <span class="se-fs- se-ff-">
+                  <a
+                    href="https://chzzk.naver.com/clips/siblingTextClip"
+                    class="se-link __se_link"
+                    data-linktype="text"
+                    data-linkdata="{&quot;link&quot;:&quot;https://chzzk.naver.com/clips/siblingTextClip&quot;}"
+                    target="_blank"
+                  >https://chzzk.naver.com/clips/siblingTextClip</a>
+                </span>
+              </p>
+              <p class="se-text-paragraph se-text-paragraph-align-">
+                <span class="se-fs- se-ff-">링크 문단과 같이 있는 일반 텍스트</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p
+        class="se-text-paragraph se-text-paragraph-align- "
+        style=""
+        id="standalone-paragraph-only"
+      >
+        <span
+          style=""
+          class="se-fs- se-ff-   "
+          id="SE-050c4e2f-d6a4-42bb-8763-033b91175312"
+        >
+          <a
+            href="https://chzzk.naver.com/clips/paragraphOnlyClip"
+            class="se-link __se_link"
+            data-linktype="text"
+            data-linkdata="{&quot;id&quot;:&quot;SE-050c4e2f-d6a4-42bb-8763-033b91175312&quot;,&quot;link&quot;:&quot;https://chzzk.naver.com/clips/paragraphOnlyClip&quot;}"
+            target="_blank"
+          >https://chzzk.naver.com/clips/paragraphOnlyClip</a>
+        </span>
+      </p>
     </main>
 
     <script>
@@ -138,6 +207,16 @@
             ?.src.includes("parent=cafe.naver.com&extension=ChzzkCafeNow") ||
             false,
         );
+        document.body.dataset.fixtureOglinkWithoutThumbnailPlayerCount = String(
+          document.querySelectorAll(
+            '#og-card-without-thumbnail [data-chzzk-cafe-now-player="clip:noThumbnailClip"]',
+          ).length,
+        );
+        document.body.dataset.fixtureInlineZeroWidthPlayerCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:inlineZeroWidthClip"]',
+          ).length,
+        );
         document.body.dataset.fixtureStandaloneEmbedPlayerCount = String(
           document.querySelectorAll(
             '[data-chzzk-cafe-now-standalone="clip:RMynBK4Xvs"]',
@@ -156,6 +235,21 @@
         document.body.dataset.fixtureBlankParagraphClipPlayerCount = String(
           document.querySelectorAll(
             '[data-chzzk-cafe-now-standalone="clip:b96w27Zyqk"]',
+          ).length,
+        );
+        document.body.dataset.fixtureSiblingTextClipPlayerCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:siblingTextClip"]',
+          ).length,
+        );
+        document.body.dataset.fixtureSiblingTextClipComponentCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:siblingTextClip"] .se-module.se-module-oglink > .chzzk-cafe-now-player + a.se-oglink-info.__se_link',
+          ).length,
+        );
+        document.body.dataset.fixtureParagraphOnlyClipPlayerCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:paragraphOnlyClip"]',
           ).length,
         );
       }, 500);

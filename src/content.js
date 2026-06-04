@@ -7,6 +7,8 @@
   const OGLINK_TITLE_SELECTOR = ".se-oglink-title";
   const CANDIDATE_SELECTOR = "a[href], [data-url], [data-link-url], [data-href]";
   const TEXT_COMPONENT_SELECTOR = "div.se-component.se-text";
+  const TEXT_PARAGRAPH_SELECTOR = ".se-text-paragraph";
+  const STANDALONE_PLAYER_SELECTOR = "[data-chzzk-cafe-now-standalone]";
   const CHZZK_ICON_URL = "https://chzzk.naver.com/favicon.ico";
 
   const OBSERVED_ATTRIBUTES = ["href", "data-url", "data-link-url", "data-href"];
@@ -57,6 +59,13 @@
     }
 
     return api.getMediaUrl(media);
+  }
+
+  function normalizeVisibleText(value) {
+    return String(value || "")
+      .replace(/\u200b/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
   }
 
   function createPlayer(media) {
@@ -116,30 +125,41 @@
   }
 
   function getStandaloneClip(component) {
-    const links = [...component.querySelectorAll("a[href]")]
-      .map((link) => ({
-        link,
-        candidate: getCandidateMedia(link),
+    const links = [...component.querySelectorAll(CANDIDATE_SELECTOR)]
+      .filter((element) => !element.closest(STANDALONE_PLAYER_SELECTOR))
+      .map((element) => ({
+        element,
+        candidate: getCandidateMedia(element),
       }))
       .filter(({ candidate }) => candidate);
     if (links.length !== 1) return null;
 
-    const { link, candidate } = links[0];
+    const { element, candidate } = links[0];
 
-    const paragraph = link.closest(".se-text-paragraph") || link.parentElement;
-    const visibleText = (paragraph?.innerText || paragraph?.textContent || "").trim();
-    const linkText = (link.textContent || "").trim();
-    if (visibleText !== linkText) return null;
+    const paragraph = element.closest(".se-text-paragraph") || element.parentElement;
+    const visibleText = normalizeVisibleText(
+      paragraph?.innerText || paragraph?.textContent,
+    );
+    const linkText = normalizeVisibleText(element.textContent);
+    const canonicalText = normalizeVisibleText(api.getMediaUrl(candidate.media));
+    const mediaUrlText = normalizeVisibleText(candidate.mediaUrl);
+    if (
+      visibleText !== linkText &&
+      visibleText !== canonicalText &&
+      visibleText !== mediaUrlText
+    ) {
+      return null;
+    }
 
-    const componentText = (component.innerText || component.textContent || "")
-      .replace(/\u200b/g, "")
-      .trim();
+    const componentText = normalizeVisibleText(
+      component.innerText || component.textContent,
+    );
 
     return {
       media: candidate.media,
       mediaKey: candidate.mediaKey,
       mediaUrl: candidate.mediaUrl,
-      target: componentText === linkText ? component : paragraph || component,
+      target: componentText === visibleText ? component : paragraph || component,
     };
   }
 
@@ -151,10 +171,15 @@
     document.querySelectorAll(TEXT_COMPONENT_SELECTOR).forEach((component) => {
       if (getStandaloneClip(component)?.mediaKey === mediaKey) component.remove();
     });
+
+    document.querySelectorAll(TEXT_PARAGRAPH_SELECTOR).forEach((paragraph) => {
+      if (getStandaloneClip(paragraph)?.mediaKey === mediaKey) paragraph.remove();
+    });
   }
 
   function hasOglinkForMedia(mediaKey) {
     return [...document.querySelectorAll(OGLINK_SELECTOR)].some((oglink) =>
+      !oglink.closest(STANDALONE_PLAYER_SELECTOR) &&
       [...oglink.querySelectorAll(CANDIDATE_SELECTOR)].some(
         (candidate) => getCandidateMedia(candidate)?.mediaKey === mediaKey,
       ),
@@ -263,6 +288,7 @@
 
   function replaceStandaloneClipComponent(component) {
     if (!component.isConnected) return;
+    if (component.closest(STANDALONE_PLAYER_SELECTOR)) return;
 
     const mediaInfo = getStandaloneClip(component);
     if (!mediaInfo) return;
@@ -273,6 +299,29 @@
     }
 
     mediaInfo.target.replaceWith(createStandalonePlayer(mediaInfo));
+  }
+
+  function findStandaloneClipContainers(root) {
+    const containers = new Set();
+
+    if (root instanceof Element) {
+      if (root.closest(STANDALONE_PLAYER_SELECTOR)) return containers;
+
+      const closestTextComponent = root.closest(TEXT_COMPONENT_SELECTOR);
+      const closestParagraph = root.closest(TEXT_PARAGRAPH_SELECTOR);
+      if (closestTextComponent) containers.add(closestTextComponent);
+      if (closestParagraph) containers.add(closestParagraph);
+    }
+
+    root.querySelectorAll(TEXT_COMPONENT_SELECTOR).forEach((component) => {
+      containers.add(component);
+    });
+
+    root.querySelectorAll(TEXT_PARAGRAPH_SELECTOR).forEach((paragraph) => {
+      containers.add(paragraph);
+    });
+
+    return containers;
   }
 
   function getFallbackTitle(title) {
@@ -408,16 +457,7 @@
 
     root.querySelectorAll(OGLINK_SELECTOR).forEach(replaceOglinkThumbnail);
 
-    if (root instanceof Element) {
-      const closestTextComponent = root.closest(TEXT_COMPONENT_SELECTOR);
-      if (closestTextComponent) {
-        replaceStandaloneClipComponent(closestTextComponent);
-      }
-    }
-
-    root
-      .querySelectorAll(TEXT_COMPONENT_SELECTOR)
-      .forEach(replaceStandaloneClipComponent);
+    findStandaloneClipContainers(root).forEach(replaceStandaloneClipComponent);
   }
 
   function flushScans() {
@@ -465,7 +505,10 @@
       subtree: true,
     });
 
-    [250, 1000, 2500].forEach((delay) => {
+    // Dense early retries so the player swaps in quickly once the SPA fills
+    // the post body. The MutationObserver above handles most cases; these are
+    // a safety net for mutations it might miss during the initial render burst.
+    [50, 150, 400, 800, 1500, 3000].forEach((delay) => {
       setTimeout(() => {
         if (document.documentElement) queueScan(document);
       }, delay);

@@ -35,6 +35,29 @@
   border-radius: 8px;
 }
 
+/*
+ * Reserve the 16:9 player area before the thumbnail is swapped out so the
+ * layout does not jump when the iframe is inserted. The class is applied in
+ * content.js before replaceOrInsertOglinkPlayer runs, so the thumbnail (and
+ * any pre-swap placeholder) already occupies the final player dimensions.
+ */
+.chzzk-cafe-now-oglink .se-oglink-thumbnail {
+  box-sizing: border-box;
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+}
+
+.chzzk-cafe-now-oglink .se-oglink-thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .chzzk-cafe-now-standalone .se-oglink-info {
   box-sizing: border-box;
   display: block;
