@@ -2,9 +2,21 @@
 
 <div align="center">
 
-**네이버 카페에서 치지직 클립을 바로 보는 가장 가벼운 방법**
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-설치하기-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/치즈-카페-나우-chzzk-cafe-now/nmgkecligcldoejbagooolglejneicdd)
+[![Edge Add-ons](https://img.shields.io/badge/Edge-설치하기-0078D7?style=for-the-badge&logo=microsoftedge&logoColor=white)](https://microsoftedge.microsoft.com/addons/detail/bibmajljbmogjflghenbdneimafnamdk)
+[![Naver Whale Store](https://img.shields.io/badge/Whale-설치하기-00C73C?style=for-the-badge&logo=naver&logoColor=white)](https://store.whale.naver.com/detail/bdbbikgdadnlhceakkhmmglbcfmielmp)
+[![Firefox Add-ons](https://img.shields.io/badge/Firefox-설치하기-FF7139?style=for-the-badge&logo=firefoxbrowser&logoColor=white)](https://addons.mozilla.org/ko/firefox/addon/치즈-카페-나우-chzzk-cafe-now//)
+
+<br>
+
+![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/nmgkecligcldoejbagooolglejneicdd?style=for-the-badge&logo=googlechrome&logoColor=white&color=4285F4&label=Chrome%20Users)
+[![Edge Add-on Users](https://img.shields.io/badge/dynamic/json?style=for-the-badge&logo=microsoftedge&label=Edge%20Users&query=%24.activeInstallCount&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fbibmajljbmogjflghenbdneimafnamdk)](https://microsoftedge.microsoft.com/addons/detail/bibmajljbmogjflghenbdneimafnamdk)
+[![Naver Whale Users](https://img.shields.io/endpoint?style=for-the-badge&logo=naver&logoColor=white&url=https%3A%2F%2Fgist.githubusercontent.com%2Flirpa62%2F98240cb437dc1cb278a5ab8741798522%2Fraw%2FChzzk-Cafe-Now-Whale-Users.json)](https://store.whale.naver.com/detail/bdbbikgdadnlhceakkhmmglbcfmielmp)
+![Mozilla Add-on Users](https://img.shields.io/amo/users/치즈-카페-나우-chzzk-cafe-now/?style=for-the-badge&logo=firefoxbrowser&logoColor=white&color=FF7139&label=Firefox%20Users)
 
 </div>
+
+**네이버 카페에서 치지직 클립을 바로 보는 가장 가벼운 방법**
 
 네이버 카페 게시글에 첨부된 치지직 클립 링크를 감지해 OG 링크 썸네일 대신 게시글 안에서 바로 재생할 수 있는 치지직 플레이어를 표시하는 Chrome 확장 프로그램입니다.
 
