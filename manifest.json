@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "치즈 카페 나우 - Chzzk Cafe Now",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "네이버 카페의 치지직 클립 링크를 게시글 안에서 바로 재생합니다.",
   "permissions": ["scripting"],
   "host_permissions": [

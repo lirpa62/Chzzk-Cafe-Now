@@ -1,11 +1,13 @@
 const CLIP_PLAY_INFO_PREFIX =
   "https://api.chzzk.naver.com/service/v1/play-info/clip/";
+const CLIP_DETAIL_PREFIX =
+  "https://api.chzzk.naver.com/service/v1/clips/";
 const CAFE_TAB_MATCH_PATTERNS = [
   "https://cafe.naver.com/*",
   "https://*.cafe.naver.com/*",
 ];
 
-function normalizeClipMetadata(payload) {
+function normalizeClipPlayInfo(payload) {
   const content = payload?.content;
   if (Number(payload?.code) !== 200 || !content) return null;
 
@@ -15,7 +17,17 @@ function normalizeClipMetadata(payload) {
   };
 }
 
-async function fetchClipMetadata(clipId) {
+function normalizeClipDetail(payload) {
+  const content = payload?.content;
+  if (Number(payload?.code) !== 200 || !content) return null;
+
+  return {
+    thumbnailImageUrl: String(content.thumbnailImageUrl || "").trim(),
+    title: String(content.clipTitle || "").trim(),
+  };
+}
+
+async function fetchClipPlayInfo(clipId) {
   const response = await fetch(
     `${CLIP_PLAY_INFO_PREFIX}${encodeURIComponent(clipId)}`,
     {
@@ -30,7 +42,42 @@ async function fetchClipMetadata(clipId) {
     throw new Error(`CHZZK API 요청 실패: HTTP ${response.status}`);
   }
 
-  return normalizeClipMetadata(await response.json());
+  return normalizeClipPlayInfo(await response.json());
+}
+
+async function fetchClipDetail(clipId) {
+  const response = await fetch(
+    `${CLIP_DETAIL_PREFIX}${encodeURIComponent(clipId)}/detail`,
+    {
+      credentials: "include",
+      headers: {
+        accept: "application/json, text/plain, */*",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`CHZZK detail API 요청 실패: HTTP ${response.status}`);
+  }
+
+  return normalizeClipDetail(await response.json());
+}
+
+async function fetchClipMetadata(clipId) {
+  const [playInfo, detail] = await Promise.allSettled([
+    fetchClipPlayInfo(clipId),
+    fetchClipDetail(clipId),
+  ]);
+
+  const playInfoMetadata = playInfo.status === "fulfilled" ? playInfo.value : null;
+  const detailMetadata = detail.status === "fulfilled" ? detail.value : null;
+  if (!playInfoMetadata && !detailMetadata) return null;
+
+  return {
+    streamerName: playInfoMetadata?.streamerName || "",
+    title: playInfoMetadata?.title || detailMetadata?.title || "",
+    thumbnailImageUrl: detailMetadata?.thumbnailImageUrl || "",
+  };
 }
 
 async function showUpdateBannerOnTab(tabId, version) {

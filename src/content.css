@@ -13,6 +13,18 @@
   background: #000;
 }
 
+.chzzk-cafe-now-player--portrait {
+  width: 473px !important;
+  max-width: 100%;
+  aspect-ratio: 473 / 841;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.chzzk-cafe-now-portrait > .se-component-content {
+  max-width: 473px !important;
+}
+
 .chzzk-cafe-now-standalone {
   box-sizing: border-box;
   width: 100%;
@@ -92,6 +104,19 @@
   align-items: center;
   gap: 5px;
   min-width: 0;
+}
+
+.chzzk-cafe-now-portrait .chzzk-cafe-now-title {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.chzzk-cafe-now-title__label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .chzzk-cafe-now-title__icon {

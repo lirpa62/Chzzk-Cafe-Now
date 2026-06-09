@@ -1,6 +1,6 @@
 {
   "name": "chzzk-cafe-now",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "generate-icons": "node scripts/generate-icons.js",

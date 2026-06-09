@@ -6,8 +6,11 @@
   const OGLINK_THUMBNAIL_SELECTOR = ".se-oglink-thumbnail";
   const OGLINK_TITLE_SELECTOR = ".se-oglink-title";
   const CANDIDATE_SELECTOR = "a[href], [data-url], [data-link-url], [data-href]";
+  const PLAYER_CONTAINER_SELECTOR =
+    ".chzzk-cafe-now-standalone, .chzzk-cafe-now-oglink";
   const TEXT_COMPONENT_SELECTOR = "div.se-component.se-text";
   const TEXT_PARAGRAPH_SELECTOR = ".se-text-paragraph";
+  const PLAYER_SELECTOR = "[data-chzzk-cafe-now-player]";
   const STANDALONE_PLAYER_SELECTOR = "[data-chzzk-cafe-now-standalone]";
   const CHZZK_ICON_URL = "https://chzzk.naver.com/favicon.ico";
 
@@ -17,6 +20,7 @@
   const pendingRoots = new Set();
   const metadataRequests = new Map();
   const metadataCache = new Map();
+  const thumbnailDimensionRequests = new Map();
   const oglinkStates = new WeakMap();
 
   function getCandidateValues(element) {
@@ -92,6 +96,85 @@
     wrapper.append(frameWrap);
 
     return wrapper;
+  }
+
+  function getMetadataDimension(metadata, key) {
+    const value = Number(metadata?.[key]);
+    return Number.isFinite(value) && value > 0 ? value : null;
+  }
+
+  function getMetadataDimensions(metadata) {
+    const width = getMetadataDimension(metadata, "width");
+    const height = getMetadataDimension(metadata, "height");
+    return width && height ? { width, height } : null;
+  }
+
+  function getPlayers(root) {
+    const players = [];
+    if (root instanceof Element && root.matches(PLAYER_SELECTOR)) {
+      players.push(root);
+    }
+    if (root instanceof Document || root instanceof Element) {
+      players.push(...root.querySelectorAll(PLAYER_SELECTOR));
+    }
+
+    return players;
+  }
+
+  function applyPlayerOrientation(root, dimensions) {
+    if (!dimensions) return;
+
+    const isPortrait = dimensions.height > dimensions.width;
+    const orientation = isPortrait ? "portrait" : "landscape";
+    getPlayers(root).forEach((player) => {
+      if (!player.isConnected) return;
+      player.classList.toggle("chzzk-cafe-now-player--portrait", isPortrait);
+      player.dataset.chzzkCafeNowOrientation = orientation;
+
+      const container = player.closest(PLAYER_CONTAINER_SELECTOR);
+      if (container) {
+        container.classList.toggle("chzzk-cafe-now-portrait", isPortrait);
+        container.dataset.chzzkCafeNowOrientation = orientation;
+      }
+    });
+  }
+
+  function loadThumbnailDimensions(thumbnailImageUrl) {
+    if (!thumbnailImageUrl) return Promise.resolve(null);
+    if (!thumbnailDimensionRequests.has(thumbnailImageUrl)) {
+      thumbnailDimensionRequests.set(
+        thumbnailImageUrl,
+        new Promise((resolve) => {
+          const image = new Image();
+          image.decoding = "async";
+          image.referrerPolicy = "no-referrer";
+          image.onload = () => {
+            const width = getMetadataDimension(image, "naturalWidth");
+            const height = getMetadataDimension(image, "naturalHeight");
+            resolve(width && height ? { width, height } : null);
+          };
+          image.onerror = () => resolve(null);
+          image.src = thumbnailImageUrl;
+        }),
+      );
+    }
+
+    return thumbnailDimensionRequests.get(thumbnailImageUrl);
+  }
+
+  function updatePlayerLayout(root, metadata) {
+    if (!metadata) return;
+
+    const metadataDimensions = getMetadataDimensions(metadata);
+    if (metadataDimensions) {
+      applyPlayerOrientation(root, metadataDimensions);
+      return;
+    }
+
+    if (!metadata.thumbnailImageUrl) return;
+    loadThumbnailDimensions(metadata.thumbnailImageUrl).then((thumbnailDimensions) => {
+      applyPlayerOrientation(root, thumbnailDimensions);
+    });
   }
 
   function findOglinkThumbnail(oglink) {
@@ -189,12 +272,14 @@
   function updateStandaloneTitle(card, mediaInfo) {
     const title = card.querySelector(OGLINK_TITLE_SELECTOR);
     if (!title) return;
+    const cachedMetadata = metadataCache.get(mediaInfo.mediaKey) || null;
 
     renderOglinkTitle(
       title,
       mediaInfo.mediaUrl,
-      metadataCache.get(mediaInfo.mediaKey) || null,
+      cachedMetadata,
     );
+    updatePlayerLayout(card, cachedMetadata);
 
     if (card.dataset.chzzkCafeNowMetadataRequested === "true") return;
     card.dataset.chzzkCafeNowMetadataRequested = "true";
@@ -208,6 +293,7 @@
       if (currentTitle) {
         renderOglinkTitle(currentTitle, mediaInfo.mediaUrl, metadata);
       }
+      updatePlayerLayout(card, metadata);
     });
   }
 
@@ -354,13 +440,17 @@
     text.className = "chzzk-cafe-now-title__text";
     text.textContent = label;
 
+    const labelWrapper = document.createElement("div");
+    labelWrapper.className = "chzzk-cafe-now-title__label";
+    labelWrapper.append(icon, text);
+
     const url = document.createElement("span");
     url.className = "chzzk-cafe-now-title__url";
     url.textContent = ` (${clipUrl})`;
 
     title.classList.add("chzzk-cafe-now-title");
     title.dataset.chzzkCafeNowTitle = renderKey;
-    title.replaceChildren(icon, text, url);
+    title.replaceChildren(labelWrapper, url);
   }
 
   function requestMediaMetadata(media) {
@@ -394,12 +484,14 @@
   function updateOglinkTitle(oglink, state) {
     const title = oglink.querySelector(OGLINK_TITLE_SELECTOR);
     if (!title) return;
+    const cachedMetadata = metadataCache.get(state.mediaKey) || null;
 
     renderOglinkTitle(
       title,
       state.mediaUrl,
-      metadataCache.get(state.mediaKey) || null,
+      cachedMetadata,
     );
+    updatePlayerLayout(oglink, cachedMetadata);
     if (state.metadataRequested) return;
 
     state.metadataRequested = true;
@@ -410,6 +502,7 @@
 
       const currentTitle = oglink.querySelector(OGLINK_TITLE_SELECTOR);
       if (currentTitle) renderOglinkTitle(currentTitle, state.mediaUrl, metadata);
+      updatePlayerLayout(oglink, metadata);
     });
   }
 

@@ -172,11 +172,15 @@
           lastError: null,
           sendMessage(message, callback) {
             globalThis.fixtureMetadataRequestCount += 1;
+            const isPortraitClip = message.mediaId === "siblingTextClip";
             setTimeout(() => {
               callback({
                 metadata: {
                   streamerName: "모라라",
                   title: "카페 가입을 안해도 월페이퍼를",
+                  thumbnailImageUrl: isPortraitClip
+                    ? "https://video-phinf.pstatic.net/portrait-thumb.jpg"
+                    : "https://video-phinf.pstatic.net/landscape-thumb.jpg",
                 },
               });
             }, 250);
@@ -185,6 +189,20 @@
       };
     </script>
     <script src="../src/clip-url.js"></script>
+    <script>
+      const NativeImage = globalThis.Image;
+      globalThis.Image = class FixtureImage {
+        set src(value) {
+          this.currentSrc = value;
+          setTimeout(() => {
+            this.naturalWidth = value.includes("portrait-thumb") ? 720 : 1920;
+            this.naturalHeight = value.includes("portrait-thumb") ? 1280 : 1080;
+            this.onload?.();
+          }, 0);
+        }
+      };
+      globalThis.Image.NativeImage = NativeImage;
+    </script>
     <script src="../src/content.js"></script>
     <script>
       setTimeout(() => {
@@ -245,6 +263,21 @@
         document.body.dataset.fixtureSiblingTextClipComponentCount = String(
           document.querySelectorAll(
             '[data-chzzk-cafe-now-standalone="clip:siblingTextClip"] .se-module.se-module-oglink > .chzzk-cafe-now-player + a.se-oglink-info.__se_link',
+          ).length,
+        );
+        document.body.dataset.fixtureSiblingTextClipPortraitPlayerCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:siblingTextClip"] .chzzk-cafe-now-player--portrait',
+          ).length,
+        );
+        document.body.dataset.fixtureSiblingTextClipPortraitContainerCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:siblingTextClip"].chzzk-cafe-now-portrait',
+          ).length,
+        );
+        document.body.dataset.fixtureSiblingTextClipTitleLabelCount = String(
+          document.querySelectorAll(
+            '[data-chzzk-cafe-now-standalone="clip:siblingTextClip"] .chzzk-cafe-now-title__label > .chzzk-cafe-now-title__icon + .chzzk-cafe-now-title__text',
           ).length,
         );
         document.body.dataset.fixtureParagraphOnlyClipPlayerCount = String(
