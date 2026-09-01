@@ -144,6 +144,44 @@
         </div>
       </div>
 
+      <div id="og-card-with-body-text" class="se-component se-oglink">
+        <div class="se-section se-section-oglink">
+          <div class="se-oglink-container">
+            <a class="se-oglink-info" href="https://chzzk.naver.com/clips/bodyTextClip">
+              <strong class="se-oglink-title">본문과 같이 있는 클립 - CHZZK</strong>
+            </a>
+            <a class="se-oglink-thumbnail" href="https://chzzk.naver.com/clips/bodyTextClip">
+              <img alt="본문과 같이 있는 클립 썸네일" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="se-component se-text se-l-default" id="duplicate-link-with-body-text">
+        <div class="se-component-content">
+          <div class="se-section se-section-text se-l-default">
+            <div class="se-module se-module-text">
+              <p class="se-text-paragraph" id="body-text-above">
+                <span class="se-fs- se-ff-">링크 위에 쓴 본문 텍스트</span>
+              </p>
+              <p class="se-text-paragraph">
+                <span class="se-fs- se-ff-">
+                  <a
+                    href="https://chzzk.naver.com/clips/bodyTextClip"
+                    class="se-link __se_link"
+                    data-linktype="text"
+                    target="_blank"
+                  >https://chzzk.naver.com/clips/bodyTextClip</a>
+                </span>
+              </p>
+              <p class="se-text-paragraph" id="body-text-below">
+                <span class="se-fs- se-ff-">링크 아래에 쓴 본문 텍스트</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <p
         class="se-text-paragraph se-text-paragraph-align- "
         style=""
@@ -283,6 +321,24 @@
         document.body.dataset.fixtureParagraphOnlyClipPlayerCount = String(
           document.querySelectorAll(
             '[data-chzzk-cafe-now-standalone="clip:paragraphOnlyClip"]',
+          ).length,
+        );
+        // The duplicate bare link is cleaned up, but the body text the author
+        // wrote above and below it must survive.
+        document.body.dataset.fixtureBodyTextAboveCount = String(
+          document.querySelectorAll("#body-text-above").length,
+        );
+        document.body.dataset.fixtureBodyTextBelowCount = String(
+          document.querySelectorAll("#body-text-below").length,
+        );
+        document.body.dataset.fixtureDuplicateBodyTextLinkCount = String(
+          document.querySelectorAll(
+            '#duplicate-link-with-body-text a[href*="bodyTextClip"]',
+          ).length,
+        );
+        document.body.dataset.fixtureBodyTextOglinkPlayerCount = String(
+          document.querySelectorAll(
+            '#og-card-with-body-text [data-chzzk-cafe-now-player="clip:bodyTextClip"]',
           ).length,
         );
       }, 500);

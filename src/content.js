@@ -2,6 +2,40 @@
   const api = globalThis.ChzzkCafeNow;
   if (!api) return;
 
+  // 글쓰기·수정 화면에서는 링크를 플레이어로 바꾸지 않는다. 작성 중인 본문의 DOM을
+  // 건드리면 에디터 상태가 어긋나 저장 시 본문이 사라지고, 인라인 재생이 글쓰기를
+  // 방해한다. (all_frames라 에디터 iframe 안에서도 이 스크립트가 돈다.)
+  function isWriteUrl(url) {
+    return (
+      // /ca-fe/cafes/{id}/articles/write — 뒤에 경로·쿼리만 올 수 있게 묶어
+      // /articles/writers 같은 다른 경로를 오탐하지 않도록 한다.
+      /\/articles\/write(?:[/?#]|$)/i.test(url) ||
+      // 수정 화면의 실제 경로는 /modify다.
+      // (예: /ca-fe/cafes/31342874/articles/8/modify)
+      /\/articles\/\d+\/(?:edit|modify)/i.test(url) ||
+      /ArticleWrite|ArticleUpdate|ArticleModify/i.test(url) // 구 에디터
+    );
+  }
+
+  function isCafeWritePage() {
+    if (isWriteUrl(`${location.pathname}${location.search}`)) return true;
+
+    // 에디터가 iframe 안에서 뜨면 프레임 URL에는 write 경로가 없을 수 있다.
+    // 같은 출처면 상위 프레임 주소로, 아니면 referrer로 한 번 더 확인한다.
+    try {
+      const top = window.top;
+      if (top && top !== window && top.location.href) {
+        if (isWriteUrl(top.location.href)) return true;
+      }
+    } catch {
+      // 교차 출처 상위 프레임 — referrer로 폴백한다.
+    }
+
+    return isWriteUrl(document.referrer || "");
+  }
+
+  if (isCafeWritePage()) return;
+
   const OGLINK_SELECTOR = "div.se-component.se-oglink";
   const OGLINK_THUMBNAIL_SELECTOR = ".se-oglink-thumbnail";
   const OGLINK_TITLE_SELECTOR = ".se-oglink-title";
@@ -251,13 +285,21 @@
       .querySelectorAll(`[data-chzzk-cafe-now-standalone="${mediaKey}"]`)
       .forEach((component) => component.remove());
 
-    document.querySelectorAll(TEXT_COMPONENT_SELECTOR).forEach((component) => {
-      if (getStandaloneClip(component)?.mediaKey === mediaKey) component.remove();
-    });
+    // Only remove the element `getStandaloneClip` narrowed the clip down to.
+    // Removing the whole container would also delete body text the author
+    // wrote alongside the link.
+    const targets = new Set();
+    const collectTarget = (container) => {
+      if (!container.isConnected) return;
 
-    document.querySelectorAll(TEXT_PARAGRAPH_SELECTOR).forEach((paragraph) => {
-      if (getStandaloneClip(paragraph)?.mediaKey === mediaKey) paragraph.remove();
-    });
+      const clip = getStandaloneClip(container);
+      if (clip?.mediaKey === mediaKey) targets.add(clip.target);
+    };
+
+    document.querySelectorAll(TEXT_COMPONENT_SELECTOR).forEach(collectTarget);
+    document.querySelectorAll(TEXT_PARAGRAPH_SELECTOR).forEach(collectTarget);
+
+    targets.forEach((target) => target.remove());
   }
 
   function hasOglinkForMedia(mediaKey) {
@@ -542,6 +584,9 @@
 
   function scan(root) {
     if (!(root instanceof Document || root instanceof Element)) return;
+    // 카페는 SPA라 '글 보기 → 수정'으로 넘어가도 스크립트가 다시 로드되지 않는다.
+    // 로드 시점의 판정만 믿으면 수정 화면에서 본문이 사라지므로 매번 확인한다.
+    if (isCafeWritePage()) return;
 
     if (root instanceof Element) {
       const closestOglink = root.closest(OGLINK_SELECTOR);
