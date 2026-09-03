@@ -50,12 +50,30 @@
 
   const OBSERVED_ATTRIBUTES = ["href", "data-url", "data-link-url", "data-href"];
 
+  // 카페는 SPA라 글을 옮겨 다녀도 이 스크립트가 다시 로드되지 않는다. 캐시에
+  // 상한이 없으면 클립이 많은 카페를 오래 둘러볼수록 항목이 계속 쌓인다.
+  const CACHE_LIMIT = 200;
+
   let scanQueued = false;
   const pendingRoots = new Set();
   const metadataRequests = new Map();
   const metadataCache = new Map();
   const thumbnailDimensionRequests = new Map();
   const oglinkStates = new WeakMap();
+
+  // Map은 삽입 순서를 지키므로 가장 오래된 항목부터 덜어내면 LRU가 된다.
+  function setWithLimit(cache, key, value) {
+    cache.delete(key);
+    cache.set(key, value);
+
+    while (cache.size > CACHE_LIMIT) {
+      const oldestKey = cache.keys().next().value;
+      if (oldestKey === undefined) break;
+      cache.delete(oldestKey);
+    }
+
+    return value;
+  }
 
   function getCandidateValues(element) {
     const values = OBSERVED_ATTRIBUTES.map((attribute) =>
@@ -176,7 +194,8 @@
   function loadThumbnailDimensions(thumbnailImageUrl) {
     if (!thumbnailImageUrl) return Promise.resolve(null);
     if (!thumbnailDimensionRequests.has(thumbnailImageUrl)) {
-      thumbnailDimensionRequests.set(
+      setWithLimit(
+        thumbnailDimensionRequests,
         thumbnailImageUrl,
         new Promise((resolve) => {
           const image = new Image();
@@ -280,10 +299,25 @@
     };
   }
 
+  // 정리 대상 미디어 키를 모아 두었다가 스캔당 한 번만 문서를 훑는다. 카드마다
+  // 문서 전체를 훑으면 클립 수에 제곱으로 비용이 늘어난다.
+  const pendingCleanupKeys = new Set();
+
   function removeStandaloneClipComponents(mediaKey) {
-    document
-      .querySelectorAll(`[data-chzzk-cafe-now-standalone="${mediaKey}"]`)
-      .forEach((component) => component.remove());
+    pendingCleanupKeys.add(mediaKey);
+  }
+
+  function flushStandaloneClipCleanup() {
+    if (!pendingCleanupKeys.size) return;
+
+    const mediaKeys = new Set(pendingCleanupKeys);
+    pendingCleanupKeys.clear();
+
+    mediaKeys.forEach((mediaKey) => {
+      document
+        .querySelectorAll(`[data-chzzk-cafe-now-standalone="${mediaKey}"]`)
+        .forEach((component) => component.remove());
+    });
 
     // Only remove the element `getStandaloneClip` narrowed the clip down to.
     // Removing the whole container would also delete body text the author
@@ -293,7 +327,7 @@
       if (!container.isConnected) return;
 
       const clip = getStandaloneClip(container);
-      if (clip?.mediaKey === mediaKey) targets.add(clip.target);
+      if (clip && mediaKeys.has(clip.mediaKey)) targets.add(clip.target);
     };
 
     document.querySelectorAll(TEXT_COMPONENT_SELECTOR).forEach(collectTarget);
@@ -329,7 +363,7 @@
     requestMediaMetadata(mediaInfo.media).then((metadata) => {
       if (!metadata || !card.isConnected) return;
 
-      metadataCache.set(mediaInfo.mediaKey, metadata);
+      setWithLimit(metadataCache, mediaInfo.mediaKey, metadata);
 
       const currentTitle = card.querySelector(OGLINK_TITLE_SELECTOR);
       if (currentTitle) {
@@ -517,7 +551,7 @@
         );
       });
 
-      metadataRequests.set(mediaKey, request);
+      setWithLimit(metadataRequests, mediaKey, request);
     }
 
     return metadataRequests.get(mediaKey);
@@ -540,7 +574,7 @@
     requestMediaMetadata(state.media).then((metadata) => {
       if (!metadata || !oglink.isConnected) return;
 
-      metadataCache.set(state.mediaKey, metadata);
+      setWithLimit(metadataCache, state.mediaKey, metadata);
 
       const currentTitle = oglink.querySelector(OGLINK_TITLE_SELECTOR);
       if (currentTitle) renderOglinkTitle(currentTitle, state.mediaUrl, metadata);
@@ -556,6 +590,11 @@
     for (const candidate of oglink.querySelectorAll(CANDIDATE_SELECTOR)) {
       const mediaInfo = getCandidateMedia(candidate);
       if (!mediaInfo) continue;
+
+      // 이미 이 미디어로 변환을 끝낸 카드는 다시 훑지 않는다. 스캔은 초기 렌더
+      // 동안 여러 번(타이머 재시도 + 변경 감지) 도는데, 매번 문서 전체를 훑으면
+      // 클립 수에 제곱으로 비용이 늘어난다.
+      if (oglink.dataset.chzzkCafeNowMediaKey === mediaInfo.mediaKey) return;
 
       let state = oglinkStates.get(oglink);
       if (!state || state.mediaKey !== mediaInfo.mediaKey) {
@@ -573,6 +612,7 @@
         .forEach((element) => element.remove());
 
       oglink.classList.add("chzzk-cafe-now-oglink");
+      oglink.dataset.chzzkCafeNowMediaKey = mediaInfo.mediaKey;
       removeStandaloneClipComponents(mediaInfo.mediaKey);
       updateOglinkTitle(oglink, state);
 
@@ -594,6 +634,10 @@
     }
 
     root.querySelectorAll(OGLINK_SELECTOR).forEach(replaceOglinkThumbnail);
+
+    // 중복 링크 정리는 남은 링크를 플레이어로 바꾸기 전에 끝내야 한다. 순서가
+    // 뒤바뀌면 오글링크가 이미 있는 클립이 플레이어로 한 번 더 만들어진다.
+    flushStandaloneClipCleanup();
 
     findStandaloneClipContainers(root).forEach(replaceStandaloneClipComponent);
   }
